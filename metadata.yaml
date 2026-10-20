@@ -1,0 +1,16 @@
+name: astrbot_plugin_phone
+display_name: 给她的手机
+desc: 给 Bot 一块能自己操作的安卓屏幕：通过 adb 连模拟器，她能截图直接看画面（主模型自带视觉）、读界面元素树拿精确坐标、点击滑动输入，自己打开 App 逛。带管理员私聊闸门与每日用量限制，防止失控。
+short_desc: adb 操控安卓模拟器，她自己看屏幕、自己点
+author: Randy Lua
+repo: https://github.com/RandyLuaW/astrbot_plugin_phone
+version: 1.0.0
+astrbot_version: ">=4.17.0"
+support_platforms:
+  - aiocqhttp
+tags:
+  - 手机
+  - 模拟器
+  - adb
+  - 视觉
+  - computer-use

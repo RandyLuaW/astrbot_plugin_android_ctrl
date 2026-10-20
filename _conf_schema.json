@@ -1,0 +1,82 @@
+{
+  "enabled": {
+    "type": "bool",
+    "default": true,
+    "description": "启用手机功能。关闭后工具全部不可用，也不占用 adb 连接。"
+  },
+  "adb_path": {
+    "type": "string",
+    "default": "",
+    "description": "adb.exe 的完整路径。留空则自动从常见安装位置探测。"
+  },
+  "device_serial": {
+    "type": "string",
+    "default": "",
+    "description": "要操作的设备序列号（如 127.0.0.1:16384）。留空则自动连接或使用唯一在线设备。"
+  },
+  "auto_connect_ports": {
+    "type": "string",
+    "default": "16384,7555,5555,62001,21503,5554",
+    "description": "没有在线设备时依次尝试 adb connect 127.0.0.1:<端口>。MuMu12=16384，MuMu6/雷电=7555/5555，夜神=62001，逍遥=21503。逗号分隔。"
+  },
+  "vision_provider": {
+    "type": "string",
+    "default": "",
+    "description": "备用视觉模型 Provider ID。留空（推荐）= 截图直接把图交给对话主模型自己看（deepseek-flash 本身支持视觉）。仅当主模型是纯文本模型时才需要填，填了会额外花一次调用把画面转成文字。"
+  },
+  "vision_timeout": {
+    "type": "int",
+    "default": 45,
+    "description": "备用视觉模型描述单张截图的超时秒数（仅在 vision_provider 非空时生效）。"
+  },
+  "max_shot_width": {
+    "type": "int",
+    "default": 540,
+    "description": "截图发给模型前缩放到的最大宽度（像素）。越小越省 token，越小细节越糊。540 通常够看清文字。"
+  },
+  "jpeg_quality": {
+    "type": "int",
+    "default": 78,
+    "description": "截图压缩成 JPEG 的质量（1-95）。"
+  },
+  "return_image": {
+    "type": "bool",
+    "default": true,
+    "description": "截图时把图片本身交给模型看。主模型支持视觉（deepseek-flash 支持）时保持开启；换成纯文本模型时才需要关掉并改用 vision_provider。"
+  },
+  "admin_only": {
+    "type": "bool",
+    "default": true,
+    "description": "只允许管理员私聊触发。开启后群聊与普通用户都拿不到手机工具。"
+  },
+  "daily_shot_limit": {
+    "type": "int",
+    "default": 150,
+    "description": "每天最多看几次屏幕。超出后 phone_look 会被拒绝，防止无节制刷屏烧钱。"
+  },
+  "daily_action_limit": {
+    "type": "int",
+    "default": 400,
+    "description": "每天最多点击/滑动/输入多少次。"
+  },
+  "max_session_minutes": {
+    "type": "int",
+    "default": 90,
+    "description": "单次「玩手机」最长持续分钟数。从第一次操作开始算，超时要求她先停手，隔一段时间才能再来。"
+  },
+  "cooldown_minutes": {
+    "type": "int",
+    "default": 10,
+    "description": "一轮用完后的冷却分钟数。"
+  },
+  "max_ui_elements": {
+    "type": "int",
+    "default": 60,
+    "description": "phone_ui 最多返回多少个界面元素。太多会淹没上下文。"
+  },
+  "cmd_timeout": {
+    "type": "int",
+    "default": 20,
+    "description": "单条 adb 命令的超时秒数。"
+  }
+}
