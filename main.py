@@ -50,7 +50,7 @@ from astrbot.api import logger
 from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star, register
 
-PLUGIN_NAME = "astrbot_plugin_phone"
+PLUGIN_NAME = "astrbot_plugin_android_ctrl"
 DATA_DIR = Path(__file__).resolve().parent
 STATE_DIR = DATA_DIR / "state"
 
@@ -197,7 +197,7 @@ def _find_adb(configured: str) -> str:
     "Randy Lua",
     "给她的手机：adb 操控安卓模拟器，她自己看屏幕、自己点",
     "1.0.0",
-    repo="https://github.com/RandyLuaW/astrbot_plugin_phone",
+    repo="https://github.com/RandyLuaW/astrbot_plugin_android_ctrl",
 )
 class PhonePlugin(Star):
     def __init__(self, context: Context, config: Any = None):

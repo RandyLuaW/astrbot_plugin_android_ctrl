@@ -1,14 +1,14 @@
-# 给她的手机：让 Bot 自己操作一块安卓屏幕
+# 安卓设备操控：让模型直接操作一块安卓屏幕
 
-> AstrBot 插件 · adb 连模拟器，截图交给模型自己看，元素树拿坐标，点击滑动输入
+> AstrBot 插件 · adb 连接模拟器或真机，截图交给模型查看，界面元素树提供精确坐标
 
 ## 它解决什么问题
 
-聊天里的「看见」是被动的——用户发什么，她看什么。
+聊天里的「看」是被动的——用户发什么，模型看什么。
 
-真正的主动是：**她自己打开 App，自己逛，自己决定点哪里**。参考那次成功会话，她像人的时刻是「手机通了，我能看见自己的桌面了」「刚才光看了没点，我点进去试试」——伸手，而不是应答。
+这个插件把一块安卓屏幕交给模型：自己打开 App、自己浏览、自己决定点哪里。截图的画面直接进入模型上下文，不需要额外的视觉模型转述；界面元素树提供精确坐标，避免截图缩放带来的偏差。
 
-但那次的失败版本是「能看到有这个工具，一调就被拦下」。工具存在不等于工具可用。所以这里把每一环都做成可验证的：连接、截图、元素树、动作，每一步失败都返回人话级的原因。
+工具存在不等于工具可用，所以每一环都做成可验证的：连接、截图、元素树、动作，每一步失败都返回可读的原因。
 
 ## 功能一览
 
@@ -16,7 +16,7 @@
 |---|---|
 | `phone_state` | 当前连接状态、今日用量、会话剩余时间 |
 | `phone_open` | 用包名或应用名打开一个 App |
-| `phone_look` | 截图，把图直接交给模型看 |
+| `phone_look` | 截图，把图直接交给模型 |
 | `phone_ui` | 读界面元素树，拿精确坐标与可点区域 |
 | `phone_tap` | 按坐标点击 |
 | `phone_tap_text` | 按文字点击（不用自己算坐标） |
@@ -25,6 +25,8 @@
 | `phone_key` | 按键（返回 / Home / 最近任务） |
 | `phone_notify` | 读取通知栏 |
 | `/手机状态` `/看看手机` | 指令，手动查状态或截图 |
+
+> 工具名统一用 `phone_` 前缀，与插件 ID 解耦，方便在配置里按前缀分组管理。
 
 ## 为什么主模型能直接看图
 
@@ -38,7 +40,7 @@
 
 ### 方式一：插件市场（推荐）
 
-WebUI 插件市场搜索「给她的手机」。
+WebUI 插件市场搜索「安卓设备操控」。
 
 ### 方式二：Releases 下载
 
@@ -48,10 +50,10 @@ WebUI 插件市场搜索「给她的手机」。
 
 ```bash
 cd AstrBot/data/plugins
-git clone https://github.com/RandyLuaW/astrbot_plugin_phone.git
+git clone https://github.com/RandyLuaW/astrbot_plugin_android_ctrl.git
 ```
 
-**前置条件**：本机装有 adb，以及一个安卓模拟器（MuMu / 雷电 / 夜神 / AVD 均可）。插件会自动探测常见 adb 路径与常见端口。
+**前置条件**：本机装有 adb，以及一个安卓模拟器（MuMu / 雷电 / 夜神 / AVD）或已开启 USB 调试的真机。插件会自动探测常见 adb 路径与常见端口。
 
 ## 配置项
 
@@ -60,7 +62,7 @@ git clone https://github.com/RandyLuaW/astrbot_plugin_phone.git
 | 键 | 类型 | 默认 | 说明 |
 |---|---|---|---|
 | `enabled` | bool | `true` | 总开关 |
-| `adb_path` | string | 空 | adb.exe 完整路径；留空自动探测 |
+| `adb_path` | string | 空 | adb 可执行文件完整路径；留空自动探测 |
 | `device_serial` | string | 空 | 目标设备序列号（如 `127.0.0.1:16384`）；留空用唯一在线设备 |
 | `auto_connect_ports` | string | `16384,7555,5555,62001,21503,5554` | 无在线设备时依次尝试 `adb connect` |
 | `cmd_timeout` | int | `20` | 单条 adb 命令超时（秒） |
@@ -80,9 +82,9 @@ git clone https://github.com/RandyLuaW/astrbot_plugin_phone.git
 | 键 | 类型 | 默认 | 说明 |
 |---|---|---|---|
 | `admin_only` | bool | `true` | 只允许管理员私聊触发（非管理员连工具定义都看不到） |
-| `daily_shot_limit` | int | `150` | 每日最多看几次屏幕 |
+| `daily_shot_limit` | int | `150` | 每日最多截图次数 |
 | `daily_action_limit` | int | `400` | 每日最多点击/滑动/输入次数 |
-| `max_session_minutes` | int | `90` | 单次「玩手机」最长持续分钟 |
+| `max_session_minutes` | int | `90` | 单次操作会话最长持续分钟 |
 | `cooldown_minutes` | int | `10` | 一轮用完后的冷却时间 |
 | `max_ui_elements` | int | `60` | `phone_ui` 最多返回多少个元素 |
 
@@ -91,7 +93,7 @@ git clone https://github.com/RandyLuaW/astrbot_plugin_phone.git
 **连不上模拟器**
 先确认模拟器已启动，再 `adb devices` 看有没有在线设备。MuMu12 默认 `16384`，MuMu6/雷电常见 `7555`，夜神 `62001`。也可以在 `device_serial` 里写死。
 
-**截图返回了，但她说看不到**
+**截图返回了，但模型说看不到**
 主模型可能不支持图片，或者 `max_tokens` 给小了（见上）。先确认 `return_image: true`，再换支持视觉的模型试。
 
 **点击位置不准**
@@ -100,8 +102,8 @@ git clone https://github.com/RandyLuaW/astrbot_plugin_phone.git
 ## 注意事项
 
 - 默认只对管理员私聊开放；非管理员会话在 `on_llm_request` 里直接把工具摘掉，连 schema 都不占
-- 有每日看屏/动作上限与单轮时长上限，防止无节制刷
-- 会改模拟器状态（安装/登录/聊天记录），建议用独立模拟器，别用主力机
+- 有每日截图/操作上限与单轮时长上限，防止无节制调用
+- 会改设备状态（安装/登录/聊天记录），建议用独立模拟器，不要用主力机
 - adb 操作是串行的，一次只跑一个动作
 
 ## License

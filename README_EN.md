@@ -1,14 +1,14 @@
-# Her own phone: let the bot drive an Android screen
+# Android Device Control: let the model drive an Android screen
 
-> AstrBot plugin · adb to an emulator; screenshots go straight to the model, UI tree gives exact coordinates
+> AstrBot plugin · adb to an emulator or a physical device; screenshots go to the model, UI tree gives exact coordinates
 
 ## The problem
 
-"Seeing" in chat is passive — she sees whatever the user sends.
+"Seeing" in chat is passive — the model sees whatever the user sends.
 
-Real initiative is: **she opens an app herself, browses, decides where to tap**. In the session that worked, the human moments were "the phone connected, I can see my own home screen" and "I only looked, didn't tap — let me try tapping in". Reaching out, not answering.
+This plugin hands it an Android screen: open apps, browse, decide where to tap. Screenshots go straight into the model's context with no intermediate vision model, and the UI tree provides exact coordinates so downscaled screenshots don't cause mis-taps.
 
-The failed version was "the tool is visible but gets blocked on the first call". A tool existing is not the same as a tool working. So every link here is verifiable: connect, screenshot, element tree, action — each failure returns a human-readable reason.
+A tool existing is not the same as a tool working, so every link is verifiable: connect, screenshot, element tree, action — each failure returns a readable reason.
 
 ## Features
 
@@ -26,9 +26,11 @@ The failed version was "the tool is visible but gets blocked on the first call".
 | `phone_notify` | Read notifications |
 | `/手机状态` `/看看手机` | Commands for status and screenshots |
 
+> Tool names keep the `phone_` prefix regardless of the plugin ID, so prefix-based grouping in config still works.
+
 ## Why the main model can see the screen
 
-`phone_look` returns a `CallToolResult` containing `ImageContent`. The framework runner turns that into a user message (`ImageURLPart`) appended to the context, so the next turn can see it — no intermediate vision model needed.
+`phone_look` returns a `CallToolResult` containing `ImageContent`. The framework runner turns that into a user message (`ImageURLPart`) appended to the context, so the next turn can see it — no intermediate vision model.
 
 This requires a vision-capable main model. Practical caveat: for reasoning models, `reasoning_content` and `content` **share the max_tokens budget**. With a small budget (say 80) the thinking consumes it all — the image is read, but the final `content` is an empty string, which looks like "vision unsupported". Don't starve max_tokens.
 
@@ -38,7 +40,7 @@ Only when switching to a text-only model do you need `vision_provider` to conver
 
 ### Option 1: Plugin marketplace (recommended)
 
-Search "给她的手机" in the AstrBot WebUI plugin marketplace.
+Search "安卓设备操控" in the AstrBot WebUI plugin marketplace.
 
 ### Option 2: Download from Releases
 
@@ -48,10 +50,10 @@ Grab the zip from [Releases](../../releases), then WebUI → Plugins → Upload.
 
 ```bash
 cd AstrBot/data/plugins
-git clone https://github.com/RandyLuaW/astrbot_plugin_phone.git
+git clone https://github.com/RandyLuaW/astrbot_plugin_android_ctrl.git
 ```
 
-**Prerequisites**: adb installed, plus an Android emulator (MuMu / LDPlayer / Nox / AVD). The plugin auto-detects common adb paths and ports.
+**Prerequisites**: adb installed, plus an Android emulator (MuMu / LDPlayer / Nox / AVD) or a physical device with USB debugging enabled. The plugin auto-detects common adb paths and ports.
 
 ## Configuration
 
@@ -82,7 +84,7 @@ git clone https://github.com/RandyLuaW/astrbot_plugin_phone.git
 | `admin_only` | bool | `true` | Admin private chat only (tools are removed entirely for others) |
 | `daily_shot_limit` | int | `150` | Screenshots per day |
 | `daily_action_limit` | int | `400` | Actions per day |
-| `max_session_minutes` | int | `90` | Max length of one phone session |
+| `max_session_minutes` | int | `90` | Max length of one control session |
 | `cooldown_minutes` | int | `10` | Cooldown between sessions |
 | `max_ui_elements` | int | `60` | Max elements returned by `phone_ui` |
 
@@ -90,7 +92,7 @@ git clone https://github.com/RandyLuaW/astrbot_plugin_phone.git
 
 **Can't connect** — start the emulator, run `adb devices`. MuMu12 uses `16384`, MuMu6/LDPlayer `7555`, Nox `62001`. Or pin `device_serial`.
 
-**Screenshot returned but she says she can't see it** — the model may lack vision, or max_tokens is too small (see above). Check `return_image: true` first.
+**Screenshot returned but the model says it can't see it** — the model may lack vision, or max_tokens is too small (see above). Check `return_image: true` first.
 
 **Taps land in the wrong place** — use `phone_ui` coordinates, not estimates from a screenshot; screenshots are downscaled so visual coordinates don't match the real resolution.
 
@@ -98,7 +100,7 @@ git clone https://github.com/RandyLuaW/astrbot_plugin_phone.git
 
 - Admin private chat only by default; other sessions get the tools removed in `on_llm_request`, so they don't even cost schema tokens
 - Daily screenshot/action caps and a session length cap prevent runaway usage
-- It changes emulator state (installs, logins, chat history) — use a dedicated emulator, not your daily driver
+- It changes device state (installs, logins, chat history) — use a dedicated emulator, not your daily driver
 - adb operations are serialized
 
 ## License
